@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Letöltés{% endblock %}
+{% block content %}
+<form id="frmconvert" method="post">
+    <div class="row form-row">
+      <div class="form-floating col-10">
+        <textarea name="txturl" class="form-control" style="height: 150px;"></textarea>
+        <label for="txturl">Másold ide a youtube linkeket külön sorba</label>
+      </div>
+      <div class="col-2" style="vertical-align: middle;">
+        <div id="rowmp3" class="row" style="margin: 5px;">
+          <button type="submit" id="btnmp3" name="btnmp3" class="btn btn-primary">Konvertálj audióra</button>
+        </div>
+        <div id="rowmp4" class="row" style="margin: 5px;">
+          <button type="submit" id="btnmp4" name="btnmp4" class="btn btn-primary">Konvertálj videóra</button>
+        </div>
+
+      </div>
+    </div>
+    
+    <div id="progress" style="display: none;">
+      <div id="progressbar">10%</div>
+    </div>
+    
+    <div name="resultcontainer" style="margin: 10px;">
+      {% for file in downloaded %}
+        {% set idx = downloaded.index(file) %}
+        <div id="result_{{ idx }}" class="row" style="margin-bottom: 10px; align-items: center;">
+          <button class="col-2 btn btn-primary" type="button" id="btndownload_{{ idx }}">Letöltés</button>
+          <input type="hidden" id="fullfilename_{{ idx }}" value="{{ file.FilePath }}"/>
+          <input type="hidden" id="filenameext_{{ idx }}" value="{{ file.FileExt }}"/>
+          <div class="col-8">{{ file.Tail }}</div>
+        </div>
+      {% endfor %}
+     
+    </div>  
+  </form>
+
+  {% endblock %}
+
+  {% block script %}
+<script>
+
+  var progressidx = 0;
+  var intervalhandler;
+  $(document).ready(function () {
+    $('button[id^="btnmp"]').click(function(event) {
+      $("#rowmp3").hide();
+      $("#rowmp4").hide();
+
+      $("#progress").show();
+      intervalhandler = setInterval(updateProgress, 1000);
+
+      $("#fromconvert").submit();
+    });
+
+    $('button[id^="btndownload_"]').click(function(event) {
+      var idx = this.id.split('_')[1];
+
+      var fullname = $("#fullfilename_" + idx).val();
+      var nameext = $("#filenameext_" + idx).val();
+    
+      var url = encodeURI(`/download?fullname=${encodeURIComponent(fullname)}&nameext=${encodeURIComponent(nameext)}`);
+      window.location.href = url;
+    
+      $("#result_" + idx).hide();
+
+      event.preventDefault();
+    
+    });
+  });
+
+  function updateProgress() {
+    var elem = document.getElementById("progressbar");
+
+    $.get("/progress", function(data, status){
+      alert("Data: " + data + "\nStatus: " + status);
+
+      var width = 1;
+      elem.style.width = width + "%";
+      if (width >= 100) {
+        clearInterval(intervalhandler);
+      }
+  
+    });
+
+  }
+
+</script>
+
+{% endblock %}

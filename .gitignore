@@ -1,0 +1,7 @@
+ffmpeg-2024-02-04-git-7375a6ca7b-full_build/**
+Scripts/**
+Lib/**
+share/**
+app/__pycache__/**
+
+.venv
