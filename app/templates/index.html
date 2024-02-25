@@ -18,9 +18,9 @@
       </div>
     </div>
     
-    <div id="progress" style="display: none;">
+    <!-- <div id="progress" style="display: none;">
       <div id="progressbar">10%</div>
-    </div>
+    </div> -->
     
     <div name="resultcontainer" style="margin: 10px;">
       {% for file in downloaded %}
@@ -36,6 +36,16 @@
     </div>  
   </form>
 
+  <div class="modal fade" id="progressmodal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <img src="{{ url_for('static', filename='typing-jim-carey.gif') }}" width="99%" />
+        </div>
+      </div>
+    </div>
+  </div>
+
   {% endblock %}
 
   {% block script %}
@@ -44,12 +54,12 @@
   var progressidx = 0;
   var intervalhandler;
   $(document).ready(function () {
-    $('button[id^="btnmp"]').click(function(event) {
-      $("#rowmp3").hide();
-      $("#rowmp4").hide();
+    $("#progressmodal").modal('hide');
 
-      $("#progress").show();
-      intervalhandler = setInterval(updateProgress, 1000);
+    $('button[id^="btnmp"]').click(function(event) {
+
+      $("#progressmodal").modal('show');
+      //intervalhandler = setInterval(updateProgress, 1000);
 
       $("#fromconvert").submit();
     });
@@ -70,21 +80,23 @@
     });
   });
 
+/*
   function updateProgress() {
     var elem = document.getElementById("progressbar");
 
     $.get("/progress", function(data, status){
-      alert("Data: " + data + "\nStatus: " + status);
+      console.log("Data: " + data + "\nStatus: " + status);
 
-      var width = 1;
-      elem.style.width = width + "%";
-      if (width >= 100) {
-        clearInterval(intervalhandler);
-      }
+      // var width = 1;
+      // elem.style.width = width + "%";
+      // if (width >= 100) {
+      //   clearInterval(intervalhandler);
+      // }
   
     });
 
   }
+*/
 
 </script>
 

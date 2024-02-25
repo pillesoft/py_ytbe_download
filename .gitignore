@@ -5,3 +5,4 @@ share/**
 app/__pycache__/**
 
 .venv
+var/downloaded/**
