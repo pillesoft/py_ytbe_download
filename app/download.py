@@ -16,14 +16,27 @@
 import yt_dlp
 import os
 from .mediafile import MediaFile
+import logging
 
+class DownloadLogger(object):
+    def info(self, msg):
+        logging.info(msg)
+
+    def debug(self, msg):
+        logging.debug(msg)
+    
+    def warning(self, msg):
+        logging.warning(msg)
+
+    def error(self, msg):
+        logging.error(msg)
 
 class Download:
 
     __mp3opts = {
         'proxy': '',
         'format': 'bestaudio/best',
-        'outtmpl': 'var/downloaded/%(autonumber)s-%(title)s',
+        # 'outtmpl': 'var/downloaded/%(autonumber)s-%(title)s',
         'verbose': '',
         'ffmpeg_location': 'ffmpeg-2024-02-04-git-7375a6ca7b-full_build\\bin\\ffmpeg.exe',
         'postprocessors': [{
@@ -31,7 +44,7 @@ class Download:
             'preferredcodec': 'mp3',
             'preferredquality': '320',
         }],
-        # 'logger': MyLogger(),
+        'logger': DownloadLogger(),
         # 'progress_hooks': [self.monitor],
     }
 
@@ -46,7 +59,7 @@ class Download:
         #     'preferredcodec': 'mp4',
             # 'ext': 'mp4'
         # }],
-        # 'logger': MyLogger(),
+        'logger': DownloadLogger(),
         # 'progress_hooks': [monitor],
     }
 
@@ -56,11 +69,18 @@ class Download:
     def Files(self):
         return self._files
     
-    def __init__(self):
+    def __init__(self, config):
+        logging.info('initiate download class')
+
         self._files = []
+        self.__downloadpath = config['DOWNLOADED_PATH']
+        self.__ffmpegpath = config['FFMPEG_PATH']
 
     def download_mp3(self, urls: list[str]):
         self.__mp3opts['progress_hooks'] = [self.monitor]
+        self.__mp3opts['outtmpl'] = '{}/%(autonumber)s-%(title)s'.format(self.__downloadpath)
+        if self.__ffmpegpath is not None:
+            self.__mp3opts['ffmpeg_location'] = self.__ffmpegpath
 
         with yt_dlp.YoutubeDL(self.__mp3opts) as ydl:
             for url in urls:

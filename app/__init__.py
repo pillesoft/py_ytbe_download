@@ -1,10 +1,14 @@
 import os
 from urllib.parse import unquote_plus
 from flask import Flask, render_template, send_file, request, flash
+import logging
 
 from .download import MediaFile, Download, ConvertError
 
 def create_app(test_config=None):
+
+    logging.basicConfig(filename='ytd.log', format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG)
+
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
@@ -19,9 +23,29 @@ def create_app(test_config=None):
         # load the test config if passed in
         app.config.from_mapping(test_config)
 
-    # ensure the instance folder exists
+    # to create environment variables in windows - powershell terminal
+    # $env:YTD_ENV = "dev"
+        
+    env = os.getenv('YTD_ENV')
+    logging.info('environment: %s', env)
+
+    if env == 'dev':
+        from .config import DevelopmentConfig
+        app.config.from_object(DevelopmentConfig())
+    elif env == 'prod':
+        from .config import ProductionConfig
+        app.config.from_object(ProductionConfig())
+    else:
+        from .config import Config
+        app.config.from_object(Config())
+        logging.warning('there is no YTD_ENV environment variable defined')
+        print('Please define environment variable [YTD_ENV] for the environment. Values are dev or prod')
+
+    logging.info('download path: %s', app.config['DOWNLOADED_PATH'])
+    logging.info('ffmpeg path: %s', app.config['FFMPEG_PATH'])
+
     try:
-        os.makedirs(app.instance_path)
+        os.makedirs(app.config['DOWNLOADED_PATH'])
     except OSError:
         pass
 
@@ -42,7 +66,7 @@ def create_app(test_config=None):
         if error is not None:
             flash(error, category='warning')
 
-        d: Download = Download()
+        d: Download = Download(app.config)
         filenames: list[MediaFile] = []
         
         urls = url.split(os.linesep)
@@ -76,6 +100,8 @@ def create_app(test_config=None):
     # a simple page that says hello
     @app.route('/hello')
     def hello():
+        print(app.config)
+        logging.info('hello')
         return 'Hello, World!'
 
     return app
