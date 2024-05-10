@@ -11,7 +11,8 @@
             "module": "flask",
             "env": {
                 "FLASK_APP": "app",
-                "FLASK_DEBUG": "1"
+                "FLASK_DEBUG": "1",
+                "YTD_ENV": "dev"
             },
             "args": [
                 "run",

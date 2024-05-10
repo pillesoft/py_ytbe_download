@@ -51,12 +51,12 @@ class Download:
     __mp4opts = {
         'proxy': '',
         'format': 'best',
-        'outtmpl': 'var/downloaded/%(autonumber)s-%(title)s.mp4',
+        # 'outtmpl': 'var/downloaded/%(autonumber)s-%(title)s.mp4',
         'verbose': '',
         'ffmpeg_location': 'ffmpeg-2024-02-04-git-7375a6ca7b-full_build\\bin\\ffmpeg.exe',
         # 'postprocessors': [{
-        #     'key': 'FFmpegVideoConvertor',
-        #     'preferredcodec': 'mp4',
+            # 'key': 'FFmpegVideoConvertor',
+            # 'preferredcodec': 'mp4',
             # 'ext': 'mp4'
         # }],
         'logger': DownloadLogger(),
@@ -98,13 +98,26 @@ class Download:
                 #     raise ConvertError(error_code)
         
 
-    def download_mp4(self, url: list[str]):
+    def download_mp4(self, urls: list[str]):
         self.__mp4opts['progress_hooks'] = [self.monitor]
+        self.__mp4opts['outtmpl'] = '{}/%(autonumber)s-%(title)s.mp4'.format(self.__downloadpath)
+        if self.__ffmpegpath is not None:
+            self.__mp4opts['ffmpeg_location'] = self.__ffmpegpath
 
         with yt_dlp.YoutubeDL(self.__mp4opts) as ydl:
-            error_code = ydl.download(url)
-        if error_code != 0:
-            raise ConvertError(error_code)
+            for url in urls:
+                file: MediaFile = MediaFile(url)
+                self._files.append(file)
+                try:
+                    error_code = ydl.download(url)
+
+                    file.Ext = ''
+                    file.ErrorCode = error_code
+                except yt_dlp.DownloadError as e:
+                    file.ErrorDescription = e.msg
+
+        # if error_code != 0:
+        #     raise ConvertError(error_code)
         
     def getFile(self, url: str):
         return [f for f in self._files if f.Url == url]
