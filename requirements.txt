@@ -15,4 +15,5 @@ requests==2.31.0
 urllib3==2.2.0
 websockets==12.0
 Werkzeug==3.1.0
-yt-dlp==2025.11.12
+yt-dlp==2026.3.13
+yt-dlp-ejs==0.7.0

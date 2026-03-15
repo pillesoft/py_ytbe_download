@@ -45,6 +45,8 @@ class Download:
             'preferredquality': '320',
         }],
         'logger': DownloadLogger(),
+        # 'remote-components': 'ejs:npm',
+        # 'js-runtimes': 'node:c:\\program files\\nodejs\\node.exe'
         # 'progress_hooks': [self.monitor],
     }
 
@@ -81,6 +83,7 @@ class Download:
         self.__mp3opts['outtmpl'] = '{}/%(autonumber)s-%(title)s'.format(self.__downloadpath)
         if self.__ffmpegpath is not None:
             self.__mp3opts['ffmpeg_location'] = self.__ffmpegpath
+        self.__mp3opts['js_runtimes'] = { 'deno': { 'path': 'C:\\Users\\ihorvath\\.deno\\bin\\deno.exe' } }
 
         with yt_dlp.YoutubeDL(self.__mp3opts) as ydl:
             for url in urls:
